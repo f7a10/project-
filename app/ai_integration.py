@@ -18,7 +18,7 @@ class OpenRouterAI:
     def __init__(self, api_key: Optional[str] = None):
         """Initialize the OpenRouter AI client."""
         # Use the provided API key or the environment variable
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or "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"
+        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or "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"
 
         # Log API key status (not the actual key)
         if self.api_key:
@@ -40,7 +40,7 @@ class OpenRouterAI:
             self.client = None
 
         # Model configuration
-        self.model = "deepseek/deepseek-r1:free"  # Updated model
+        self.model = "qwen/qwq-32b:free"  # Updated model
         self.http_referer = "https://smartdatahub.com"  # Replace with your actual domain
         self.site_name = "SmartDataHub"    # Your app name
 

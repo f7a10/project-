@@ -31,7 +31,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # API keys
-    OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY') or "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"
+    OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY') or "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"
 
     # AI model config
     OPENROUTER_MODEL = "deepseek-ai/deepseek-coder-33b-instruct"

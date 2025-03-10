@@ -143,8 +143,9 @@
             transition: border-color 0.3s;
         }
 
-        .file-upload-area:hover {
+        .file-upload-area:hover, .file-upload-area.drag-over {
             border-color: #a855f7;
+            background-color: rgba(168, 85, 247, 0.05);
         }
 
         .hidden-input {
@@ -222,7 +223,7 @@
             border-radius: 6px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             font-weight: 600;
             display: flex;
             justify-content: center;
@@ -232,15 +233,19 @@
 
         .btn-analyze:hover {
             background-color: #9333ea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
         }
 
         .btn-analyze:disabled {
             background-color: #6b21a8;
             opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        /* Dashboard section styles */
+        /* Dashboard section styles - ENHANCED */
         .dashboard-section {
             padding: 2rem;
             max-width: 1200px;
@@ -256,8 +261,12 @@
         }
 
         .dashboard-header h3 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #fff;
+            font-weight: 600;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .dashboard-actions {
@@ -268,98 +277,153 @@
         .btn-filter, .btn-export {
             background-color: rgba(30, 32, 50, 0.7);
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .btn-filter:hover, .btn-export:hover {
-            background-color: rgba(60, 62, 80, 0.7);
+            background-color: rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.4);
+            transform: translateY(-2px);
         }
 
+        /* Enhanced Metrics Grid */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .metric-card {
-            background-color: rgba(30, 32, 50, 0.7);
-            padding: 1.5rem;
-            border-radius: 10px;
+            background: linear-gradient(145deg, rgba(30, 32, 50, 0.7), rgba(40, 42, 70, 0.7));
+            padding: 1.7rem;
+            border-radius: 16px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(168, 85, 247, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
+            opacity: 0.8;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(168, 85, 247, 0.4);
         }
 
         .metric-value {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #a855f7;
-            font-weight: bold;
+            font-size: 2.5rem;
+            margin-bottom: 0.7rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
         }
 
         .metric-label {
             color: #d1d5db;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        /* Enhanced chart navigation */
         .chart-tabs {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 0.8rem;
+            margin-bottom: 1.8rem;
             overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
             padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .chart-tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .chart-tab {
             background: none;
             border: none;
-            color: #d1d5db;
-            padding: 0.5rem 1rem;
+            color: #a3a3c2;
+            padding: 0.7rem 1.2rem;
             cursor: pointer;
-            font-size: 0.9rem;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .chart-tab.active {
-            color: #a855f7;
-            border-bottom: 2px solid #a855f7;
+            color: #fff;
+            background: rgba(168, 85, 247, 0.15);
+            font-weight: 500;
         }
 
+        .chart-tab:hover:not(.active) {
+            color: #fff;
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        /* Enhanced Charts Grid */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .chart-card {
-            background-color: rgba(30, 32, 50, 0.7);
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(145deg, rgba(30, 32, 50, 0.7), rgba(40, 42, 70, 0.7));
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(168, 85, 247, 0.15);
+            transition: all 0.3s ease;
+            min-height: 400px;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(168, 85, 247, 0.4);
         }
 
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
         }
 
         .chart-header h4 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #fff;
+            font-weight: 600;
         }
 
         .chart-controls {
@@ -367,96 +431,166 @@
             gap: 0.5rem;
         }
 
-        .btn-chart-control {
+        .btn-chart-control, .btn-expand-chart {
             background: none;
             border: none;
-            color: #d1d5db;
+            color: #a3a3c2;
             cursor: pointer;
-            transition: color 0.3s;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
-        .btn-chart-control:hover {
-            color: #a855f7;
+        .btn-chart-control:hover, .btn-expand-chart:hover {
+            background-color: rgba(168, 85, 247, 0.1);
+            color: #fff;
         }
 
         .chart-body {
-            height: 250px;
+            padding: 1.5rem;
+            height: 300px;
             position: relative;
+            width: 100%;
+        }
+
+        /* Chart expanded view */
+        .chart-expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 17, 35, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .chart-expanded .chart-body {
+            width: 90%;
+            height: 70vh;
+            max-width: 1200px;
+        }
+
+        .chart-expanded .close-expanded {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
         /* AI Analysis Section */
         .ai-analysis-section {
             margin-top: 2rem;
-            background-color: rgba(30, 32, 50, 0.7);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(145deg, rgba(30, 32, 50, 0.7), rgba(40, 42, 70, 0.7));
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(168, 85, 247, 0.15);
         }
 
         .ai-analysis-section h3 {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
             color: #fff;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
         }
 
         .ai-analysis-section p {
             color: #d1d5db;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .btn-analyze-ai {
-            background-color: #a855f7;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.3s;
-            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             max-width: 200px;
+            font-weight: 500;
         }
 
         .btn-analyze-ai:hover {
-            background-color: #9333ea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
         }
 
         /* AI Chat Box */
         .ai-chat-box {
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            background-color: #1e2032;
+            background-color: rgba(30, 32, 50, 0.7);
             border: 1px solid rgba(168, 85, 247, 0.2);
-            margin-top: 1rem;
+            margin-top: 1.2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .chat-messages {
             padding: 1.5rem;
-            max-height: 300px;
-            min-height: 150px;
+            max-height: 350px;
+            min-height: 200px;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(168, 85, 247, 0.3) rgba(30, 32, 50, 0.7);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(30, 32, 50, 0.7);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: rgba(168, 85, 247, 0.3);
+            border-radius: 6px;
         }
 
         .message {
-            margin-bottom: 1rem;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
             max-width: 85%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .ai-message {
-            background-color: #2d3748;
+            background-color: rgba(45, 55, 72, 0.8);
             color: #e2e8f0;
             border-left: 3px solid #a855f7;
         }
 
         .user-message {
-            background-color: #4b5563;
+            background-color: rgba(75, 85, 99, 0.8);
             color: #e2e8f0;
             margin-left: auto;
             border-right: 3px solid #a855f7;
@@ -464,40 +598,45 @@
 
         .chat-input-container {
             display: flex;
-            background-color: #1f2937;
+            background-color: rgba(31, 41, 55, 0.8);
             padding: 1rem;
             gap: 0.8rem;
+            border-top: 1px solid rgba(168, 85, 247, 0.15);
         }
 
         #chat-input {
             flex: 1;
-            background-color: #374151;
-            border: none;
+            background-color: rgba(55, 65, 81, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.2);
             padding: 0.8rem 1rem;
-            border-radius: 6px;
+            border-radius: 8px;
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
 
         #chat-input:focus {
-            outline: 2px solid #a855f7;
+            outline: none;
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
         }
 
         .btn-send {
-            background-color: #a855f7;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
             color: white;
             border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 6px;
+            padding: 0.8rem;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .btn-send:hover {
-            background-color: #9333ea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
         }
 
         /* Help button */
@@ -512,7 +651,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: #a855f7;
+            background: linear-gradient(145deg, #a855f7, #7928ca);
             color: white;
             border: none;
             cursor: pointer;
@@ -520,11 +659,12 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .btn-help:hover {
-            background-color: #9333ea;
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
         }
 
         /* Loading spinner */
@@ -548,21 +688,22 @@
             top: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            border-radius: 6px;
+            border-radius: 10px;
             color: white;
             font-weight: 500;
             z-index: 1000;
             opacity: 0;
             transform: translateY(-20px);
             transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .toast.success {
-            background-color: #10b981;
+            background: linear-gradient(145deg, #10b981, #059669);
         }
 
         .toast.error {
-            background-color: #ef4444;
+            background: linear-gradient(145deg, #ef4444, #dc2626);
         }
 
         .toast.show {
@@ -593,16 +734,24 @@
                 font-size: 2rem;
             }
 
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
             .charts-grid {
                 grid-template-columns: 1fr;
             }
 
-            .chat-input-container {
+            .chart-navigation {
                 flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
             }
 
-            .btn-send {
-                width: 100%;
+            .chart-body {
+                height: 250px;
             }
         }
     </style>
@@ -680,27 +829,12 @@
             </div>
         </div>
 
-        <!-- Key Metrics -->
+        <!-- Enhanced Key Metrics -->
         <div class="metrics-grid" id="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value">87%</div>
-                <div class="metric-label">Performance Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">2.4M</div>
-                <div class="metric-label">Total Records</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">$12.5K</div>
-                <div class="metric-label">Revenue</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">95.4%</div>
-                <div class="metric-label">Satisfaction Rate</div>
-            </div>
+            <!-- Metrics will be dynamically populated -->
         </div>
 
-        <!-- Chart Selection Tabs -->
+        <!-- Enhanced Chart Selection Tabs -->
         <div class="chart-tabs">
             <button class="chart-tab active" data-chart="overview">Overview</button>
             <button class="chart-tab" data-chart="distribution">Distribution</button>
@@ -715,9 +849,9 @@
                 <div class="chart-header">
                     <h4>Performance Metrics</h4>
                     <div class="chart-controls">
-                        <button class="btn-chart-control">
+                        <button class="btn-expand-chart" data-chart="performanceChart">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -731,9 +865,9 @@
                 <div class="chart-header">
                     <h4>Category Distribution</h4>
                     <div class="chart-controls">
-                        <button class="btn-chart-control">
+                        <button class="btn-expand-chart" data-chart="categoryChart">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -747,9 +881,9 @@
                 <div class="chart-header">
                     <h4>Monthly Comparison</h4>
                     <div class="chart-controls">
-                        <button class="btn-chart-control">
+                        <button class="btn-expand-chart" data-chart="comparisonChart">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -763,9 +897,9 @@
                 <div class="chart-header">
                     <h4>Correlation Analysis</h4>
                     <div class="chart-controls">
-                        <button class="btn-chart-control">
+                        <button class="btn-expand-chart" data-chart="correlationChart">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -831,12 +965,16 @@
             const chatMessages = document.getElementById('chat-messages');
             const toast = document.getElementById('toast');
             const chartTabs = document.querySelectorAll('.chart-tab');
+            const expandButtons = document.querySelectorAll('.btn-expand-chart');
 
             // Track uploaded files
             let uploadedFiles = [];
 
             // Chart objects
-            let performanceChart, categoryChart, comparisonChart, correlationChart;
+            let performanceChart = null;
+            let categoryChart = null;
+            let comparisonChart = null;
+            let correlationChart = null;
 
             // Handle file selection
             fileInput.addEventListener('change', function() {
@@ -962,11 +1100,12 @@
                     return response.json();
                 })
                 .then(data => {
+                    // Debug: Log the exact structure of the data
+                    console.log('Analysis data structure:', JSON.stringify(data, null, 2));
+
                     // Re-enable button
                     analyzeButton.disabled = false;
                     analyzeButton.textContent = 'Analyze with AI';
-
-                    console.log('Analysis data:', data);
 
                     if (data.success) {
                         showToast('Analysis complete!', 'success');
@@ -1003,22 +1142,49 @@
                 // Scroll to dashboard
                 dashboardSection.scrollIntoView({ behavior: 'smooth' });
 
-                // Update metrics
-                if (data.metrics) {
-                    const metricsGrid = document.getElementById('metrics-grid');
-                    metricsGrid.innerHTML = '';
+                // Update metrics - with better error handling
+                const metricsGrid = document.getElementById('metrics-grid');
+                metricsGrid.innerHTML = '';
 
-                    for (const key in data.metrics) {
-                        const metric = data.metrics[key];
-                        const card = document.createElement('div');
-                        card.className = 'metric-card';
-                        card.innerHTML = `
-                            <div class="metric-value">${metric.value}</div>
-                            <div class="metric-label">${metric.label}</div>
-                        `;
-                        metricsGrid.appendChild(card);
+                // Define default metrics if none are provided
+                const defaultMetrics = {
+                    totalRecords: { label: "Total Records", value: "0" },
+                    dataQuality: { label: "Data Quality", value: "0%" },
+                    completeness: { label: "Completeness", value: "0%" },
+                    fields: { label: "Fields", value: "0" }
+                };
+
+                // Use provided metrics or defaults
+                const metrics = data.metrics || defaultMetrics;
+
+                // Ensure we have at least our base metrics
+                for (const [key, defaultMetric] of Object.entries(defaultMetrics)) {
+                    // If this metric isn't in the provided data, use the default
+                    if (!metrics[key]) {
+                        metrics[key] = defaultMetric;
                     }
                 }
+
+                // Add each metric card with animation
+                Object.entries(metrics).forEach(([key, metric], index) => {
+                    const card = document.createElement('div');
+                    card.className = 'metric-card';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+                    card.innerHTML = `
+                        <div class="metric-value">${metric.value || "0"}</div>
+                        <div class="metric-label">${metric.label || key}</div>
+                    `;
+                    metricsGrid.appendChild(card);
+
+                    // Animate entrance
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 * index);
+                });
 
                 // Update charts
                 updateCharts(data.charts || {});
@@ -1061,6 +1227,10 @@
                     };
                 }
 
+                // Set chart defaults
+                Chart.defaults.color = '#a3a3c2';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+
                 // Performance Chart (Line)
                 updatePerformanceChart(chartData.performance);
 
@@ -1072,47 +1242,96 @@
 
                 // Correlation Chart (Heatmap-like)
                 updateCorrelationChart(chartData.correlation);
+
+                // Set up chart expansion event handlers
+                setupChartExpansion();
             }
 
             // Update Performance Chart
             function updatePerformanceChart(data) {
                 const ctx = document.getElementById('performanceChart').getContext('2d');
 
-                // Destroy previous chart if exists
-                if (performanceChart) {
-                    performanceChart.destroy();
+                // Create gradient
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
+                gradient.addColorStop(1, 'rgba(168, 85, 247, 0.0)');
+
+                // If we have too many data points, consider decimation
+                let optimizedLabels = data.labels;
+                let optimizedValues = data.values;
+
+                // If we have more than 20 data points, decimate for performance
+                if (data.labels && data.labels.length > 20) {
+                    // Sample data at regular intervals
+                    const step = Math.ceil(data.labels.length / 20);
+                    optimizedLabels = data.labels.filter((_, i) => i % step === 0);
+                    optimizedValues = data.values.filter((_, i) => i % step === 0);
+                }
+
+                // Safely destroy previous chart if it exists
+                try {
+                    if (performanceChart instanceof Chart) {
+                        performanceChart.destroy();
+                    }
+                } catch (e) {
+                    console.error("Error destroying performance chart:", e);
                 }
 
                 performanceChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.labels,
+                        labels: optimizedLabels,
                         datasets: [{
                             label: 'Performance',
-                            data: data.values,
-                            backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                            data: optimizedValues,
+                            backgroundColor: gradient,
                             borderColor: '#a855f7',
                             borderWidth: 2,
                             tension: 0.4,
-                            fill: true
+                            fill: true,
+                            pointBackgroundColor: '#a855f7',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            intersect: false,
+                            axis: 'x'
+                        },
                         plugins: {
                             legend: {
                                 display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                borderColor: 'rgba(168, 85, 247, 0.3)',
+                                borderWidth: 1
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
+                                    color: 'rgba(255, 255, 255, 0.05)'
                                 },
                                 ticks: {
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    padding: 10
                                 }
                             },
                             x: {
@@ -1120,7 +1339,12 @@
                                     display: false
                                 },
                                 ticks: {
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    padding: 10,
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 15 // Limit the number of ticks
                                 }
                             }
                         }
@@ -1132,9 +1356,13 @@
             function updateCategoryChart(data) {
                 const ctx = document.getElementById('categoryChart').getContext('2d');
 
-                // Destroy previous chart if exists
-                if (categoryChart) {
-                    categoryChart.destroy();
+                // Safely destroy previous chart if it exists
+                try {
+                    if (categoryChart instanceof Chart) {
+                        categoryChart.destroy();
+                    }
+                } catch (e) {
+                    console.error("Error destroying category chart:", e);
                 }
 
                 categoryChart = new Chart(ctx, {
@@ -1151,12 +1379,18 @@
                                 '#ef4444',
                                 '#ec4899'
                             ],
-                            borderWidth: 0
+                            borderWidth: 3,
+                            borderColor: 'rgba(17, 24, 39, 0.8)'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            animateRotate: true,
+                            animateScale: true
+                        },
                         plugins: {
                             legend: {
                                 position: 'right',
@@ -1165,8 +1399,20 @@
                                     font: {
                                         size: 11
                                     },
-                                    padding: 15
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
                                 }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: true,
+                                borderColor: 'rgba(168, 85, 247, 0.3)',
+                                borderWidth: 1
                             }
                         }
                     }
@@ -1177,9 +1423,13 @@
             function updateComparisonChart(data) {
                 const ctx = document.getElementById('comparisonChart').getContext('2d');
 
-                // Destroy previous chart if exists
-                if (comparisonChart) {
-                    comparisonChart.destroy();
+                // Safely destroy previous chart if it exists
+                try {
+                    if (comparisonChart instanceof Chart) {
+                        comparisonChart.destroy();
+                    }
+                } catch (e) {
+                    console.error("Error destroying comparison chart:", e);
                 }
 
                 comparisonChart = new Chart(ctx, {
@@ -1191,25 +1441,41 @@
                             data: data.values,
                             backgroundColor: 'rgba(168, 85, 247, 0.7)',
                             borderWidth: 0,
-                            borderRadius: 4
+                            borderRadius: 6,
+                            hoverBackgroundColor: '#a855f7'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
+                        },
                         plugins: {
                             legend: {
                                 display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                borderColor: 'rgba(168, 85, 247, 0.3)',
+                                borderWidth: 1
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
+                                    color: 'rgba(255, 255, 255, 0.05)'
                                 },
                                 ticks: {
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    padding: 10
                                 }
                             },
                             x: {
@@ -1217,7 +1483,12 @@
                                     display: false
                                 },
                                 ticks: {
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    padding: 10,
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 15 // Limit the number of ticks for better readability
                                 }
                             }
                         }
@@ -1229,9 +1500,13 @@
             function updateCorrelationChart(data) {
                 const ctx = document.getElementById('correlationChart').getContext('2d');
 
-                // Create a scatter chart for correlation visualization
-                if (correlationChart) {
-                    correlationChart.destroy();
+                // Safely destroy previous chart if it exists
+                try {
+                    if (correlationChart instanceof Chart) {
+                        correlationChart.destroy();
+                    }
+                } catch (e) {
+                    console.error("Error destroying correlation chart:", e);
                 }
 
                 // Convert correlation matrix to bubble data for visualization
@@ -1241,7 +1516,8 @@
                         bubbleData.push({
                             x: i,
                             y: j,
-                            r: data.values[i][j] * 20  // Scale for visibility
+                            r: Math.abs(data.values[i][j]) * 20,  // Scale for visibility
+                            v: data.values[i][j]  // Original value for tooltip
                         });
                     }
                 }
@@ -1252,29 +1528,48 @@
                         datasets: [{
                             data: bubbleData,
                             backgroundColor: function(context) {
-                                const value = context.raw.r / 20;  // Normalize back
+                                const value = context.raw.v;  // Original value
                                 if (value > 0.7) return 'rgba(168, 85, 247, 0.8)';
                                 if (value > 0.4) return 'rgba(168, 85, 247, 0.6)';
-                                return 'rgba(168, 85, 247, 0.4)';
-                            }
+                                if (value > 0) return 'rgba(168, 85, 247, 0.4)';
+                                if (value > -0.4) return 'rgba(239, 68, 68, 0.4)';
+                                if (value > -0.7) return 'rgba(239, 68, 68, 0.6)';
+                                return 'rgba(239, 68, 68, 0.8)';
+                            },
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500
+                        },
                         plugins: {
                             legend: {
                                 display: false
                             },
                             tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
                                 callbacks: {
+                                    title: function(tooltipItems) {
+                                        const x = tooltipItems[0].raw.x;
+                                        const y = tooltipItems[0].raw.y;
+                                        return `${data.labels[x]} vs ${data.labels[y]}`;
+                                    },
                                     label: function(context) {
-                                        const x = context.raw.x;
-                                        const y = context.raw.y;
-                                        const r = (context.raw.r / 20).toFixed(2);
-                                        return `${data.labels[x]} vs ${data.labels[y]}: ${r}`;
+                                        const value = context.raw.v.toFixed(2);
+                                        return `Correlation: ${value}`;
                                     }
-                                }
+                                },
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                borderColor: 'rgba(168, 85, 247, 0.3)',
+                                borderWidth: 1
                             }
                         },
                         scales: {
@@ -1283,10 +1578,13 @@
                                     callback: function(value) {
                                         return data.labels[value];
                                     },
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    font: {
+                                        size: 11
+                                    }
                                 },
                                 grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
+                                    color: 'rgba(255, 255, 255, 0.05)'
                                 }
                             },
                             y: {
@@ -1294,14 +1592,81 @@
                                     callback: function(value) {
                                         return data.labels[value];
                                     },
-                                    color: '#d1d5db'
+                                    color: '#a3a3c2',
+                                    font: {
+                                        size: 11
+                                    }
                                 },
                                 grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
+                                    color: 'rgba(255, 255, 255, 0.05)'
                                 }
                             }
                         }
                     }
+                });
+            }
+
+            // Setup chart expansion functionality
+            function setupChartExpansion() {
+                // Add click handler to expand charts
+                document.querySelectorAll('.btn-expand-chart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Get chart ID
+                        const chartId = this.getAttribute('data-chart');
+                        const chartTitle = this.closest('.chart-card').querySelector('h4').textContent;
+
+                        // Create expanded view
+                        const expandedView = document.createElement('div');
+                        expandedView.className = 'chart-expanded';
+                        expandedView.innerHTML = `
+                            <button class="close-expanded">×</button>
+                            <h2 style="color: white; margin-bottom: 1rem;">${chartTitle}</h2>
+                            <div class="chart-body">
+                                <canvas id="${chartId}-expanded"></canvas>
+                            </div>
+                        `;
+
+                        document.body.appendChild(expandedView);
+
+                        // Close button handler
+                        expandedView.querySelector('.close-expanded').addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            document.body.removeChild(expandedView);
+                        });
+
+                        // Clone the original chart in expanded view
+                        const ctx = document.getElementById(`${chartId}-expanded`).getContext('2d');
+
+                        // Get original chart instance
+                        let originalChart;
+                        switch(chartId) {
+                            case 'performanceChart':
+                                originalChart = performanceChart;
+                                break;
+                            case 'categoryChart':
+                                originalChart = categoryChart;
+                                break;
+                            case 'comparisonChart':
+                                originalChart = comparisonChart;
+                                break;
+                            case 'correlationChart':
+                                originalChart = correlationChart;
+                                break;
+                        }
+
+                        if (originalChart) {
+                            // Create a clone of the chart in the expanded view
+                            new Chart(ctx, {
+                                type: originalChart.config.type,
+                                data: JSON.parse(JSON.stringify(originalChart.data)),
+                                options: {
+                                    ...JSON.parse(JSON.stringify(originalChart.config.options)),
+                                    maintainAspectRatio: false,
+                                    responsive: true
+                                }
+                            });
+                        }
+                    });
                 });
             }
 
