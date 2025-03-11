@@ -10,7 +10,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, request, jsonify, current_app,
-    session, send_from_directory, abort
+    session, send_from_directory, abort, redirect, url_for
 )
 
 from .file_processing import DataProcessor
@@ -28,9 +28,178 @@ data_processor = DataProcessor()
 
 @main.route('/')
 def index():
-    """Render the main page."""
-    logger.info("Rendering index page")
-    return render_template('index.html')
+    """Render the a.html page first."""
+    logger.info("Rendering a.html page")
+    return render_template('a.html')
+
+@main.route('/login')
+def login():
+    """Render the login page."""
+    logger.info("Rendering login page")
+    return render_template('login.html')
+
+@main.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    """Handle login and render the main dashboard page."""
+    logger.info(f"Dashboard route called with method: {request.method}")
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        logger.debug(f"Login attempt with username: {username}")
+
+        # Here you would typically validate the credentials
+        # For this example, we'll just check if they're not empty
+        if username and password:
+            # You could set a session variable to track login status
+            session['logged_in'] = True
+            session['username'] = username
+            logger.info(f"User {username} logged in successfully")
+            return render_template('index.html', username=username)
+        else:
+            # If validation fails, go back to login with an error
+            logger.warning("Invalid login credentials")
+            return render_template('login.html', error="Invalid credentials")
+
+    # If it's a GET request, check if user is already logged in
+    if session.get('logged_in'):
+        logger.info(f"User {session.get('username')} already logged in")
+        return render_template('index.html', username=session.get('username'))
+    else:
+        # Redirect to login if not logged in
+        logger.info("User not logged in, redirecting to login page")
+        return redirect(url_for('main.login'))
+
+@main.route('/logout')
+def logout():
+    """Log out the user and redirect to the login page."""
+    logger.info(f"Logging out user: {session.get('username')}")
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    return redirect(url_for('main.login'))
+
+@main.route('/api/login', methods=['POST'])
+def api_login():
+    """API endpoint for login."""
+    try:
+        data = request.get_json()
+        username = data.get('username') or data.get('email')
+        password = data.get('password')
+        
+        logger.info(f"API login attempt for user: {username}")
+
+        # Here you would validate credentials against your database
+        # For this example, we'll use a simple check
+        if username and password:  # Replace with actual validation
+            # Generate a simple token (in production, use a proper JWT)
+            import secrets
+            token = secrets.token_hex(16)
+
+            # In a real app, you'd store this token in a database
+            # For this example, we'll store in session
+            session['token'] = token
+            session['logged_in'] = True
+            session['user_id'] = 1  # Example user ID
+            session['username'] = username.split('@')[0] if '@' in username else username
+            
+            logger.info(f"API login successful for user: {session['username']}")
+
+            return jsonify({
+                'success': True,
+                'token': token,
+                'user_id': 1,
+                'username': session['username']
+            })
+        else:
+            logger.warning("API login failed: Invalid credentials")
+            return jsonify({
+                'success': False,
+                'message': 'Invalid credentials'
+            }), 401
+
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred during login'
+        }), 500
+
+@main.route('/api/register', methods=['POST'])
+def api_register():
+    """API endpoint for user registration."""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        
+        logger.info(f"Registration attempt for: {email}")
+
+        # Validate input
+        if not name or not email or not password:
+            logger.warning("Registration failed: Missing required fields")
+            return jsonify({
+                'success': False,
+                'message': 'All fields are required'
+            }), 400
+
+        # In a real app, you would store the user in a database
+        # For this example, we'll just return success
+        logger.info(f"Registration successful for: {email}")
+        return jsonify({
+            'success': True,
+            'message': 'Account created successfully'
+        })
+
+    except Exception as e:
+        logger.error(f"Registration error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred during registration'
+        }), 500
+
+@main.route('/api/metrics', methods=['GET'])
+def api_metrics():
+    """API endpoint for metrics."""
+    # Check authentication
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if token != session.get('token'):
+        logger.warning("Unauthorized metrics request")
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    # Return sample metrics data
+    logger.info("Returning metrics data")
+    return jsonify({
+        'success': True,
+        'metrics': {
+            'users': 1250,
+            'sessions': 5432,
+            'conversion_rate': 3.2,
+            'bounce_rate': 42.5
+        }
+    })
+
+@main.route('/api/services/status', methods=['GET'])
+def api_service_status():
+    """API endpoint for service status."""
+    # Check authentication
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if token != session.get('token'):
+        logger.warning("Unauthorized service status request")
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    # Return sample service status data
+    logger.info("Returning service status data")
+    return jsonify({
+        'success': True,
+        'services': [
+            {'name': 'API Gateway', 'status': 'operational', 'uptime': 99.9},
+            {'name': 'Database', 'status': 'operational', 'uptime': 99.7},
+            {'name': 'Authentication', 'status': 'operational', 'uptime': 100},
+            {'name': 'Storage', 'status': 'operational', 'uptime': 99.5}
+        ]
+    })
 
 @main.route('/upload', methods=['POST'])
 def upload_files():
@@ -619,120 +788,3 @@ def get_default_charts():
             "values": [12, 19, 3, 5, 2]
         },
         "correlation": {
-            "labels": ["A", "B", "C", "D", "E"],
-            "values": [
-                [1, 0.8, 0.6, 0.2, 0.1],
-                [0.8, 1, 0.7, 0.3, 0.2],
-                [0.6, 0.7, 1, 0.5, 0.4],
-                [0.2, 0.3, 0.5, 1, 0.9],
-                [0.1, 0.2, 0.4, 0.9, 1]
-            ]
-        }
-    }
-
-@main.route('/ask', methods=['POST'])
-def ask_question():
-    """
-    Answer a question about the data using AI.
-    """
-    logger.info("Handling question request")
-
-    try:
-        # Get the question from the request
-        data = request.get_json()
-        if not data or 'question' not in data:
-            logger.warning("No question in the request")
-            return jsonify({"success": False, "error": "No question provided"}), 400
-
-        question = data['question']
-        logger.info(f"Received question: {question}")
-
-        # Check if there's a session
-        if 'session_id' not in session:
-            logger.warning("No session ID found")
-            return jsonify({"success": False, "error": "No active session"}), 400
-
-        session_id = session['session_id']
-
-        # Get the uploaded files for this session
-        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
-        session_folder = os.path.join(upload_folder, session_id)
-
-        if not os.path.exists(session_folder):
-            logger.warning(f"Session folder does not exist: {session_folder}")
-            return jsonify({
-                "answer": "I don't have any data to analyze. Please upload some files first."
-            })
-
-        # Get all files in the session folder
-        files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
-                if os.path.isfile(os.path.join(session_folder, f))]
-
-        if not files:
-            logger.warning(f"No files found in session folder: {session_folder}")
-            return jsonify({
-                "answer": "I don't have any data to analyze. Please upload some files first."
-            })
-
-        # Process the files to get data context
-        processed_data = data_processor.process_files(files)
-
-        # Get AI client
-        ai_client = get_ai_instance()
-        if not ai_client:
-            logger.warning("AI client is not available")
-            return jsonify({
-                "answer": "I'm analyzing your data. It appears to contain " +
-                          f"{processed_data.get('totalRecords', 'some')} records across " +
-                          f"{len(files)} files. What specific insights are you looking for?"
-            })
-
-        # Create data context for the AI
-        data_context = {
-            "files": [os.path.basename(f) for f in files],
-            "data_overview": processed_data
-        }
-
-        # Get answer from AI
-        answer = ai_client.answer_question(question, data_context)
-
-        return jsonify({"answer": answer})
-
-    except Exception as e:
-        logger.error(f"Exception in ask_question: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            "answer": f"I'm sorry, I encountered an error while processing your question: {str(e)}"
-        })
-
-@main.route('/file/<path:filename>')
-def get_file(filename):
-    """
-    Serve an uploaded file.
-    """
-    logger.info(f"Request to get file: {filename}")
-
-    try:
-        # Check if there's a session
-        if 'session_id' not in session:
-            logger.warning("No session ID found")
-            abort(403)
-
-        session_id = session['session_id']
-
-        # Check if the file exists in the session's folder
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], session_id, filename)
-        if not os.path.exists(file_path):
-            logger.warning(f"File not found: {file_path}")
-            abort(404)
-
-        # Serve the file
-        return send_from_directory(
-            os.path.join(current_app.config['UPLOAD_FOLDER'], session_id),
-            filename
-        )
-
-    except Exception as e:
-        logger.error(f"Exception in get_file: {str(e)}")
-        logger.error(traceback.format_exc())
-        abort(500)
