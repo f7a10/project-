@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDataHub - Enterprise AI Analytics Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #8957ff;
+            --secondary-color: #6c47d5;
+            --accent-color: #ff57b9;
+            --background-dark: #0f172a;
+            --background-light: #1e293b;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --card-background: #ffffff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:not(.btn-remix)::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-remix {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: var(--text-primary);
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(137, 87, 255, 0.25);
+            font-weight: 600;
+        }
+
+        .btn-remix:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(137, 87, 255, 0.35);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 10rem 1rem 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease-out;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+
+        .dashboard {
+            background: var(--card-background);
+            border-radius: 24px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            animation: slideUp 1s ease-out;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 16px;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--background-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 16px;
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--background-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-circle {
+            width: 180px;
+            height: 180px;
+            margin: 2rem auto;
+            position: relative;
+            background: conic-gradient(
+                var(--primary-color) 72.2%,
+                #e2e8f0 0
+            );
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-circle::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .stats-circle::after {
+            content: '72.2%';
+            position: absolute;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--background-dark);
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: var(--background-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: var(--text-primary);
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(137, 87, 255, 0.25);
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(137, 87, 255, 0.35);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .dashboard {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--background-dark);
+        }
+
+        .data-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .floating-menu {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .floating-menu:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">SmartDataHub</div>
+        <div class="nav-links">
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">Reports</a>
+            <a href="#">Support</a>
+            <a href="/login" class="btn-remix">Login</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <h1>Transform Data into Actionable Insights</h1>
+        <p>Leverage AI-powered analytics to unlock hidden patterns, optimize performance, and drive business growth</p>
+        <a href="/login" class="btn-primary">Continue to Login</a>
+    </section>
+
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h2 style="color: var(--background-dark); font-size: 1.75rem; font-weight: 700;">Analytics Overview</h2>
+            <div style="display: flex; gap: 1rem;">
+                <button class="action-btn">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button class="action-btn">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">87%</div>
+                <div class="stat-label">Performance Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">2.4M</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">$12.5K</div>
+                <div class="stat-label">Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">95.4%</div>
+                <div class="stat-label">Satisfaction Rate</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-card">
+                <div class="chart-title">
+                    Performance Metrics
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="action-btn">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Resource Usage</div>
+                <div class="stats-circle"></div>
+                <button class="btn-remix" style="width: 100%; margin-top: 1rem;">
+                    <i class="fas fa-robot"></i> Analyze with AI
+                </button>
+            </div>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Usage</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>API Gateway</td>
+                    <td><span class="status-badge status-active">Active</span></td>
+                    <td>85%</td>
+                    <td>2 mins ago</td>
+                </tr>
+                <tr>
+                    <td>Database Cluster</td>
+                    <td><span class="status-badge status-active">Active</span></td>
+                    <td>72%</td>
+                    <td>5 mins ago</td>
+                </tr>
+                <tr>
+                    <td>Cache Service</td>
+                    <td><span class="status-badge status-pending">Pending</span></td>
+                    <td>45%</td>
+                    <td>12 mins ago</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="floating-menu">
+        <i class="fas fa-headset" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+    </div>
+
+    <script>
+        // API URL for backend communication
+        const API_URL = 'http://localhost:5000/api';
+
+        // Authentication functions
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.user_id,
+                        username: data.username
+                    }));
+                    return true;
+                }
+                throw new Error(data.message);
+            } catch (error) {
+                console.error('Login error:', error);
+                return false;
+            }
+        }
+
+        // Data fetching functions
+        async function fetchMetrics() {
+            try {
+                const response = await fetch(`${API_URL}/metrics`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+                return [];
+            }
+        }
+
+        async function fetchServiceStatus() {
+            try {
+                const response = await fetch(`${API_URL}/services/status`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching service status:', error);
+                return [];
+            }
+        }
+
+        // Initialize performance chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Performance',
+                    data: [65, 75, 70, 80, 75, 85, 82, 90, 85, 88, 92, 95],
+                    borderColor: '#8957ff',
+                    backgroundColor: 'rgba(137, 87, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add login button functionality
+        document.querySelectorAll('a[href="/login"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = '/login';
+            });
+        });
+    </script>
+</body>
+</html>
