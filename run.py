@@ -26,7 +26,9 @@ else:
     logger.warning("No .env file found, using default environment variables")
 
 def main():
-    """Main function to run the Flask application."""
+    """
+    Main function to run the Flask application.
+    """
     try:
         # Set Flask environment to development if not already set
         if not os.environ.get('FLASK_ENV'):
@@ -53,8 +55,9 @@ def main():
             logger.info(f"Route: {rule}, Methods: {rule.methods}")
 
         # Run the application
+        # Default to port 5000 but allow environment variable override
         port = int(os.environ.get('PORT', 5000))
-        host = os.environ.get('HOST', '0.0.0.0')
+        host = os.environ.get('HOST', '0.0.0.0')  # 0.0.0.0 for all interfaces
 
         logger.info(f"Starting SmartDataHub application on {host}:{port}")
         logger.info(f"Debug mode: {app.debug}")
