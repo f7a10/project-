@@ -10,14 +10,15 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, request, jsonify, current_app,
-    session, send_from_directory, abort, redirect, url_for
+    session, send_from_directory, abort, redirect,url_for
 )
 
 from .file_processing import DataProcessor
 from .ai_integration import get_ai_instance
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Create a Blueprint for routes
@@ -25,6 +26,40 @@ main = Blueprint('main', __name__)
 
 # Initialize data processor
 data_processor = DataProcessor()
+
+# Helper function to load a DataFrame dynamically
+def load_dataframe(file_path):
+    try:
+        _, ext = os.path.splitext(file_path)
+        ext = ext.lower()
+        if ext == '.csv':
+            try:
+                df = pd.read_csv(file_path)
+            except UnicodeDecodeError:
+                df = pd.read_csv(file_path, encoding='latin1')
+        elif ext in ['.xlsx', '.xls']:
+            df = pd.read_excel(file_path)
+        elif ext == '.json':
+            try:
+                df = pd.read_json(file_path)
+            except ValueError:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    df = pd.DataFrame.from_dict(data, orient='index')
+                else:
+                    df = pd.DataFrame(data)
+        elif ext in ['.txt', '.dat']:
+            df = pd.read_csv(file_path, sep=None, engine='python')
+        else:
+            logger.warning(f"Unsupported file type: {ext}")
+            return None
+        logger.info(f"Loaded dataframe from {file_path} with shape: {df.shape}")
+        return df
+    except Exception as e:
+        logger.error(f"Error loading file {file_path}: {str(e)}")
+        logger.error(traceback.format_exc())
+        return None
 
 @main.route('/')
 def index():
@@ -125,102 +160,21 @@ def api_login():
             'message': 'An error occurred during login'
         }), 500
 
-@main.route('/api/register', methods=['POST'])
-def api_register():
-    """API endpoint for user registration."""
-    try:
-        data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
-        password = data.get('password')
-        
-        logger.info(f"Registration attempt for: {email}")
-
-        # Validate input
-        if not name or not email or not password:
-            logger.warning("Registration failed: Missing required fields")
-            return jsonify({
-                'success': False,
-                'message': 'All fields are required'
-            }), 400
-
-        # In a real app, you would store the user in a database
-        # For this example, we'll just return success
-        logger.info(f"Registration successful for: {email}")
-        return jsonify({
-            'success': True,
-            'message': 'Account created successfully'
-        })
-
-    except Exception as e:
-        logger.error(f"Registration error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'An error occurred during registration'
-        }), 500
-
-@main.route('/api/metrics', methods=['GET'])
-def api_metrics():
-    """API endpoint for metrics."""
-    # Check authentication
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    if token != session.get('token'):
-        logger.warning("Unauthorized metrics request")
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-
-    # Return sample metrics data
-    logger.info("Returning metrics data")
-    return jsonify({
-        'success': True,
-        'metrics': {
-            'users': 1250,
-            'sessions': 5432,
-            'conversion_rate': 3.2,
-            'bounce_rate': 42.5
-        }
-    })
-
-@main.route('/api/services/status', methods=['GET'])
-def api_service_status():
-    """API endpoint for service status."""
-    # Check authentication
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
-    if token != session.get('token'):
-        logger.warning("Unauthorized service status request")
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-
-    # Return sample service status data
-    logger.info("Returning service status data")
-    return jsonify({
-        'success': True,
-        'services': [
-            {'name': 'API Gateway', 'status': 'operational', 'uptime': 99.9},
-            {'name': 'Database', 'status': 'operational', 'uptime': 99.7},
-            {'name': 'Authentication', 'status': 'operational', 'uptime': 100},
-            {'name': 'Storage', 'status': 'operational', 'uptime': 99.5}
-        ]
-    })
-
 @main.route('/upload', methods=['POST'])
 def upload_files():
     """
     Handle file uploads, save them, and return a response.
     """
     logger.info("Handling file upload request")
-
-    # Debug: Log the request
     logger.debug(f"Request files: {request.files}")
-    logger.debug(f"Request form: {request.form}")
 
     try:
-        # Check if any files were uploaded - frontend uses 'files[]'
+        # Check if any files were uploaded
         uploaded_files = []
-
         if 'files[]' in request.files:
             uploaded_files = request.files.getlist('files[]')
             logger.debug(f"Found files under 'files[]': {[f.filename for f in uploaded_files]}")
         else:
-            # Check for any files in the request
             for key in request.files:
                 if request.files.getlist(key):
                     uploaded_files = request.files.getlist(key)
@@ -238,24 +192,17 @@ def upload_files():
 
         # List to store saved files
         saved_files = []
-
-        # Ensure upload folder exists
         upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
         session_folder = os.path.join(upload_folder, session['session_id'])
         os.makedirs(session_folder, exist_ok=True)
 
-        # Save each uploaded file
         for file in uploaded_files:
             if file and file.filename:
                 try:
-                    # Secure the filename
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(session_folder, filename)
-
-                    # Save the file
                     file.save(file_path)
                     saved_files.append(file_path)
-
                     logger.info(f"Successfully saved file: {filename} to {file_path}")
                 except Exception as e:
                     logger.error(f"Error saving file {file.filename}: {str(e)}")
@@ -265,7 +212,6 @@ def upload_files():
             logger.warning("No files were successfully saved")
             return jsonify({"success": False, "error": "Failed to save any files"}), 500
 
-        # Return success response
         return jsonify({
             "success": True,
             "message": f"Successfully uploaded {len(saved_files)} file(s)",
@@ -284,26 +230,20 @@ def analyze_data():
     Analyze the uploaded files and generate visualizations.
     """
     logger.info("Handling analyze data request")
-
     try:
-        # Check if there's a session
         if 'session_id' not in session:
             logger.warning("No session ID found")
             return jsonify({"success": False, "error": "No active session"}), 400
 
         session_id = session['session_id']
         logger.debug(f"Using session_id: {session_id}")
-
-        # Get the uploaded files for this session
         upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
         session_folder = os.path.join(upload_folder, session_id)
 
-        # Check if the folder exists
         if not os.path.exists(session_folder):
             logger.warning(f"Session folder does not exist: {session_folder}")
             return jsonify({"success": False, "error": "No files found for session"}), 404
 
-        # Get all files in the session folder
         files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
                 if os.path.isfile(os.path.join(session_folder, f))]
 
@@ -312,39 +252,32 @@ def analyze_data():
             return jsonify({"success": False, "error": "No files found"}), 404
 
         logger.debug(f"Found files: {files}")
-
-        # Process the files
         logger.info(f"Processing {len(files)} files")
-        processed_data = data_processor.process_files(files)
+        processed_data = process_files_directly(files)
 
-        # Check if processing was successful
         if not processed_data.get("success", False):
             logger.warning("File processing failed")
             return jsonify({"success": False, "error": "File processing failed", "details": processed_data}), 500
 
-        # Generate dashboard data
-        dashboard_data = generate_dashboard_data(processed_data, files, session_id)
-
-        # Add file info and success flag
+        dashboard_data = generate_dashboard_data_from_files(processed_data, files, session_id)
         dashboard_data["files"] = [os.path.basename(f) for f in files]
         dashboard_data["success"] = True
 
-        # Get AI insights if available
         try:
             ai_client = get_ai_instance()
             if ai_client:
-                # Generate AI insights
                 data_summary = {
                     "files": [os.path.basename(f) for f in files],
-                    "metrics": dashboard_data["metrics"],
+                    "metrics": dashboard_data.get("metrics", {}),
                     "data_overview": processed_data
                 }
-                dashboard_data["ai_insights"] = ai_client.analyze_data_initial(data_summary)
+                ai_insights = ai_client.analyze_data_initial(data_summary)
+                dashboard_data["ai_insights"] = ai_insights
             else:
-                dashboard_data["ai_insights"] = "I've analyzed your data and found some interesting patterns in the visualizations. You can explore them in the charts above."
+                dashboard_data["ai_insights"] = "AI analysis is not available at the moment."
         except Exception as ai_error:
             logger.error(f"Error generating AI insights: {str(ai_error)}")
-            dashboard_data["ai_insights"] = "I've analyzed your data and prepared visualizations based on the content of your files."
+            dashboard_data["ai_insights"] = "Unable to generate AI insights at this time."
 
         return jsonify(dashboard_data)
 
@@ -353,42 +286,87 @@ def analyze_data():
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
 
-def generate_dashboard_data(processed_data, file_paths, session_id):
+def process_files_directly(file_paths):
     """
-    Generate data for the dashboard from processed file data.
-    
-    Args:
-        processed_data: Dictionary with processed file data
-        file_paths: List of file paths
-        session_id: The session ID
-        
-    Returns:
-        Dictionary with dashboard data
+    Direct file processing to extract summary data from files.
+    """
+    results = {"success": False}
+    file_data = {}
+    try:
+        for file_path in file_paths:
+            file_name = os.path.basename(file_path)
+            _, ext = os.path.splitext(file_path)
+            ext = ext.lower()
+
+            try:
+                if ext == '.csv':
+                    df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip')
+                elif ext in ['.xlsx', '.xls']:
+                    df = pd.read_excel(file_path)
+                elif ext == '.json':
+                    df = pd.read_json(file_path)
+                else:
+                    df = pd.read_csv(file_path, sep=None, engine='python', on_bad_lines='skip')
+
+                logger.info(f"Successfully loaded file {file_name} with shape {df.shape}")
+
+                summary = {
+                    "shape": {"rows": df.shape[0], "columns": df.shape[1]},
+                    "columns": list(df.columns),
+                    "dtypes": {col: str(df[col].dtype) for col in df.columns},
+                    "missing_data": {col: int(df[col].isnull().sum()) for col in df.columns},
+                    "numeric_columns": {},
+                    "categorical_columns": {}
+                }
+
+                for col in df.select_dtypes(include=['number']).columns:
+                    summary["numeric_columns"][str(col)] = {
+                        "min": float(df[col].min()) if not pd.isna(df[col].min()) else 0,
+                        "max": float(df[col].max()) if not pd.isna(df[col].max()) else 0,
+                        "mean": float(df[col].mean()) if not pd.isna(df[col].mean()) else 0
+                    }
+
+                for col in df.select_dtypes(exclude=['number']).columns:
+                    value_counts = df[col].value_counts().head(10).to_dict()
+                    summary["categorical_columns"][str(col)] = {str(k): int(v) for k, v in value_counts.items()}
+
+                file_data[file_name] = summary
+
+            except Exception as e:
+                logger.error(f"Error processing file {file_name}: {str(e)}")
+                logger.error(traceback.format_exc())
+                file_data[file_name] = {"error": str(e)}
+
+        if file_data:
+            results = file_data
+            results["success"] = True
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Exception in process_files_directly: {str(e)}")
+        logger.error(traceback.format_exc())
+        return {"success": False, "error": str(e)}
+
+def generate_dashboard_data_from_files(processed_data, file_paths, session_id):
+    """
+    Generate dashboard data from processed files.
     """
     logger.info("Generating dashboard data from actual file data")
-
     try:
-        # Initialize dashboard data with proper structure
         dashboard_data = {
             "metrics": {},
             "charts": {}
         }
-
-        # Calculate metrics
         metrics = generate_metrics(processed_data)
         dashboard_data["metrics"] = metrics
-
-        # Calculate chart data from actual file data
         charts = generate_chart_data_from_files(processed_data, file_paths, session_id)
         dashboard_data["charts"] = charts
-
         return dashboard_data
 
     except Exception as e:
         logger.error(f"Error generating dashboard data: {str(e)}")
         logger.error(traceback.format_exc())
-
-        # Return empty dashboard data with error information
         return {
             "metrics": {
                 "totalRecords": {"label": "Total Records", "value": "Error"},
@@ -403,26 +381,12 @@ def generate_dashboard_data(processed_data, file_paths, session_id):
 def generate_metrics(processed_data):
     """
     Generate metrics from processed data.
-    
-    Args:
-        processed_data: Dictionary with processed file data
-        
-    Returns:
-        Dictionary with metrics
     """
     logger.info("Generating metrics")
-
     try:
-        # Remove 'success' key for metrics calculation
         data_dict = {k: v for k, v in processed_data.items() if k != 'success'}
-
-        # Calculate total records
         total_records = 0
-
-        # Calculate number of fields
         total_fields = 0
-
-        # Calculate data completeness
         total_cells = 0
         missing_cells = 0
 
@@ -430,49 +394,32 @@ def generate_metrics(processed_data):
             if 'error' in file_data:
                 logger.warning(f"Skipping file with error: {filename}")
                 continue
-
-            # Add to total records
             if 'shape' in file_data:
                 rows = file_data['shape'].get('rows', 0)
                 cols = file_data['shape'].get('columns', 0)
-
                 total_records += rows
                 total_fields += cols
+            if 'missing_data' in file_data:
+                file_missing = sum(file_data['missing_data'].values())
+                file_cells = rows * cols
+                missing_cells += file_missing
+                total_cells += file_cells
 
-                # Calculate data completeness
-                if 'missing_data' in file_data:
-                    file_missing = sum(file_data['missing_data'].values())
-                    file_cells = rows * cols
+        data_quality = 100.0 if total_cells == 0 else 100 - ((missing_cells / total_cells) * 100)
+        completeness = 100.0 if total_cells == 0 else 100 - ((missing_cells / total_cells) * 100)
 
-                    missing_cells += file_missing
-                    total_cells += file_cells
-
-        # Calculate data quality (a simple measure based on missing data)
-        data_quality = 100.0
-        if total_cells > 0:
-            data_quality = 100 - ((missing_cells / total_cells) * 100)
-
-        # Calculate completeness
-        completeness = 100.0
-        if total_cells > 0:
-            completeness = 100 - ((missing_cells / total_cells) * 100)
-
-        # Create metrics dictionary with proper formatting
         metrics = {
             "totalRecords": {"label": "Total Records", "value": f"{total_records:,}"},
             "dataQuality": {"label": "Data Quality", "value": f"{data_quality:.1f}%"},
             "completeness": {"label": "Completeness", "value": f"{completeness:.1f}%"},
             "fields": {"label": "Fields", "value": f"{total_fields}"}
         }
-
         logger.debug(f"Generated metrics: {metrics}")
         return metrics
 
     except Exception as e:
         logger.error(f"Error generating metrics: {str(e)}")
         logger.error(traceback.format_exc())
-
-        # Return default metrics
         return {
             "totalRecords": {"label": "Total Records", "value": "0"},
             "dataQuality": {"label": "Data Quality", "value": "0%"},
@@ -483,32 +430,21 @@ def generate_metrics(processed_data):
 def generate_chart_data_from_files(processed_data, file_paths, session_id):
     """
     Generate chart data from actual file data.
-
-    Args:
-        processed_data: Dictionary with processed file data
-        file_paths: List of file paths
-        session_id: The session ID
-
-    Returns:
-        Dictionary with chart data
     """
     logger.info("Generating chart data from file contents")
     logger.debug(f"File paths: {file_paths}")
     logger.debug(f"Processed data keys: {list(processed_data.keys())}")
 
     try:
-        # Initialize charts
         charts = {
             "performance": {"labels": [], "values": []},
             "category": {"labels": [], "values": []},
             "comparison": {"labels": [], "values": []},
-            "correlation": {"labels": [], "values": []}
+            "correlation": {"labels": [], "values": []},
+            "radar": {"labels": [], "datasets": []}
         }
 
-        # Remove 'success' key for chart calculation
         data_dict = {k: v for k, v in processed_data.items() if k != 'success'}
-
-        # Check if there's any valid data - match by basename to handle path differences
         valid_files = []
         for f in file_paths:
             base_name = os.path.basename(f)
@@ -521,168 +457,132 @@ def generate_chart_data_from_files(processed_data, file_paths, session_id):
             logger.debug(f"File basenames: {[os.path.basename(f) for f in file_paths]}")
             return charts
 
-        # Use the first valid file for chart generation
         file_path, key = valid_files[0]
-        file_data = data_dict[key]
         logger.info(f"Using file {file_path} for chart generation")
-
-        # Load the actual dataframe for visualization
         try:
             df = load_dataframe(file_path)
             if df is None:
                 logger.warning(f"Failed to load dataframe from {file_path}")
                 return charts
-
             logger.info(f"Successfully loaded dataframe with shape {df.shape}")
             logger.debug(f"DataFrame columns: {list(df.columns)}")
             logger.debug(f"DataFrame dtypes: {df.dtypes}")
-
-            # PERFORMANCE CHART (based on numeric data)
-            numeric_cols = df.select_dtypes(include=['number']).columns
-            if len(numeric_cols) > 0:
-                chosen_col = numeric_cols[0]  # Use first numeric column
-                logger.info(f"Using numeric column {chosen_col} for performance chart")
-
-                # Check if there's a date column to use as x-axis
-                date_cols = [col for col in df.columns if 'date' in str(col).lower() or 'time' in str(col).lower()]
-
-                if date_cols and len(date_cols) > 0:
-                    # Time series data
-                    try:
-                        df[date_cols[0]] = pd.to_datetime(df[date_cols[0]], errors='coerce')
-                        df_valid = df.dropna(subset=[date_cols[0], chosen_col])
-
-                        if len(df_valid) > 0:
-                            df_sorted = df_valid.sort_values(by=date_cols[0])
-
-                            # Limit points for performance
-                            if len(df_sorted) > 30:
-                                step = len(df_sorted) // 30
-                                df_sampled = df_sorted.iloc[::step, :]
-                            else:
-                                df_sampled = df_sorted
-
-                            date_labels = df_sampled[date_cols[0]].dt.strftime('%Y-%m-%d').tolist()
-                            numeric_values = df_sampled[chosen_col].tolist()
-
-                            charts["performance"]["labels"] = date_labels
-                            charts["performance"]["values"] = numeric_values
-                            logger.info(f"Generated time series chart with {len(charts['performance']['labels'])} points")
-                    except Exception as e:
-                        logger.error(f"Error creating time series chart: {str(e)}")
-                        logger.error(traceback.format_exc())
-                else:
-                    # Regular numeric data - use row numbers as x-axis
-                    try:
-                        values = df[chosen_col].dropna().head(30).tolist()
-                        labels = [f"Row {i+1}" for i in range(len(values))]
-
-                        charts["performance"]["labels"] = labels
-                        charts["performance"]["values"] = values
-                        logger.info(f"Generated performance chart with {len(values)} points")
-                    except Exception as e:
-                        logger.error(f"Error creating basic performance chart: {str(e)}")
-                        logger.error(traceback.format_exc())
-
-            # CATEGORY CHART (based on categorical data)
-            categorical_cols = df.select_dtypes(exclude=['number']).columns.tolist()
-            if categorical_cols:
-                try:
-                    chosen_cat_col = categorical_cols[0]  # Use first categorical column
-                    logger.info(f"Using categorical column {chosen_cat_col} for category chart")
-
-                    # Get value counts, handling potential data issues
-                    value_counts = df[chosen_cat_col].value_counts().head(7)
-
-                    # Ensure all values are serializable (convert to strings)
-                    cat_labels = [str(x) for x in value_counts.index.tolist()]
-                    cat_values = [float(x) for x in value_counts.values.tolist()]
-
-                    # If there are more than 7 categories, group the rest as "Other"
-                    if len(df[chosen_cat_col].unique()) > 7:
-                        other_count = df[chosen_cat_col].value_counts().iloc[7:].sum()
-                        cat_labels.append("Other")
-                        cat_values.append(float(other_count))
-
-                    charts["category"]["labels"] = cat_labels
-                    charts["category"]["values"] = cat_values
-
-                    logger.info(f"Generated category chart with {len(charts['category']['labels'])} categories")
-                except Exception as e:
-                    logger.error(f"Error creating category chart: {str(e)}")
-                    logger.error(traceback.format_exc())
-
-            # COMPARISON CHART (comparing numeric columns)
-            if len(numeric_cols) >= 2:
-                try:
-                    # Use up to 6 numeric columns
-                    cols_to_use = numeric_cols[:6]
-                    logger.info(f"Using columns {cols_to_use} for comparison chart")
-
-                    # Get means of each column, handling potential NaN values
-                    means = []
-                    for col in cols_to_use:
-                        col_mean = df[col].mean()
-                        means.append(float(col_mean) if not pd.isna(col_mean) else 0.0)
-
-                    # Convert column names to strings to ensure serializability
-                    charts["comparison"]["labels"] = [str(col) for col in cols_to_use.tolist()]
-                    charts["comparison"]["values"] = means
-
-                    logger.info(f"Generated comparison chart with {len(cols_to_use)} columns")
-                except Exception as e:
-                    logger.error(f"Error creating comparison chart: {str(e)}")
-                    logger.error(traceback.format_exc())
-            elif len(numeric_cols) == 1 and categorical_cols:
-                # One numeric and one categorical - show numeric by category
-                try:
-                    num_col = numeric_cols[0]
-                    cat_col = categorical_cols[0]
-                    logger.info(f"Using {num_col} by {cat_col} for comparison chart")
-
-                    # Group by category and calculate means
-                    grouped = df.groupby(cat_col)[num_col].mean().sort_values(ascending=False).head(6)
-
-                    # Ensure serializability
-                    comp_labels = [str(x) for x in grouped.index.tolist()]
-                    comp_values = [float(x) for x in grouped.values.tolist()]
-
-                    charts["comparison"]["labels"] = comp_labels
-                    charts["comparison"]["values"] = comp_values
-
-                    logger.info(f"Generated comparison chart with {len(grouped)} categories")
-                except Exception as e:
-                    logger.error(f"Error creating grouped comparison chart: {str(e)}")
-                    logger.error(traceback.format_exc())
-
-            # CORRELATION CHART (correlation between numeric columns)
-            if len(numeric_cols) > 1:
-                try:
-                    # Use up to 5 numeric columns
-                    cols_for_corr = numeric_cols[:5]
-                    logger.info(f"Using columns {cols_for_corr} for correlation chart")
-
-                    # Calculate correlation matrix, replacing NaN with 0
-                    corr_matrix = df[cols_for_corr].corr().fillna(0).values.tolist()
-
-                    # Ensure all values in the matrix are serializable
-                    corr_matrix = [[float(cell) for cell in row] for row in corr_matrix]
-
-                    charts["correlation"]["labels"] = [str(col) for col in cols_for_corr.tolist()]
-                    charts["correlation"]["values"] = corr_matrix
-
-                    logger.info(f"Generated correlation chart with {len(cols_for_corr)} dimensions")
-                except Exception as e:
-                    logger.error(f"Error creating correlation chart: {str(e)}")
-                    logger.error(traceback.format_exc())
-
         except Exception as e:
-            logger.error(f"Error processing file for charts: {str(e)}")
+            logger.error(f"Error loading dataframe: {str(e)}")
             logger.error(traceback.format_exc())
+            return charts
 
-        # Check if any charts are still empty, use defaults if needed
+        # PERFORMANCE CHART
+        numeric_cols = df.select_dtypes(include=['number']).columns
+        if len(numeric_cols) > 0:
+            chosen_col = numeric_cols[0]
+            logger.info(f"Using numeric column {chosen_col} for performance chart")
+            date_cols = [col for col in df.columns if 'date' in str(col).lower() or 'time' in str(col).lower()]
+            if date_cols:
+                try:
+                    df[date_cols[0]] = pd.to_datetime(df[date_cols[0]], errors='coerce')
+                    df_valid = df.dropna(subset=[date_cols[0], chosen_col])
+                    if len(df_valid) > 0:
+                        df_sorted = df_valid.sort_values(by=date_cols[0])
+                        if len(df_sorted) > 30:
+                            step = len(df_sorted) // 30
+                            df_sampled = df_sorted.iloc[::step, :]
+                        else:
+                            df_sampled = df_sorted
+                        date_labels = df_sampled[date_cols[0]].dt.strftime('%Y-%m-%d').tolist()
+                        numeric_values = df_sampled[chosen_col].tolist()
+                        charts["performance"]["labels"] = date_labels
+                        charts["performance"]["values"] = numeric_values
+                        logger.info(f"Generated time series chart with {len(date_labels)} points")
+                except Exception as e:
+                    logger.error(f"Error creating time series chart: {str(e)}")
+                    logger.error(traceback.format_exc())
+            else:
+                try:
+                    values = df[chosen_col].dropna().head(30).tolist()
+                    labels = [f"Row {i+1}" for i in range(len(values))]
+                    charts["performance"]["labels"] = labels
+                    charts["performance"]["values"] = values
+                    logger.info(f"Generated performance chart with {len(values)} points")
+                except Exception as e:
+                    logger.error(f"Error creating basic performance chart: {str(e)}")
+                    logger.error(traceback.format_exc())
+
+        # CATEGORY CHART
+        categorical_cols = df.select_dtypes(exclude=['number']).columns.tolist()
+        if categorical_cols:
+            try:
+                chosen_cat_col = categorical_cols[0]
+                logger.info(f"Using categorical column {chosen_cat_col} for category chart")
+                value_counts = df[chosen_cat_col].value_counts().head(7)
+                cat_labels = [str(x) for x in value_counts.index.tolist()]
+                cat_values = [float(x) for x in value_counts.values.tolist()]
+                if len(df[chosen_cat_col].unique()) > 7:
+                    other_count = df[chosen_cat_col].value_counts().iloc[7:].sum()
+                    cat_labels.append("Other")
+                    cat_values.append(float(other_count))
+                charts["category"]["labels"] = cat_labels
+                charts["category"]["values"] = cat_values
+                logger.info(f"Generated category chart with {len(cat_labels)} categories")
+            except Exception as e:
+                logger.error(f"Error creating category chart: {str(e)}")
+                logger.error(traceback.format_exc())
+
+        # COMPARISON CHART (only if at least 2 numeric columns exist)
+        if len(numeric_cols) >= 2:
+            try:
+                cols_to_use = numeric_cols[:6]
+                logger.info(f"Using columns {cols_to_use} for comparison chart")
+                means = []
+                for col in cols_to_use:
+                    col_mean = df[col].mean()
+                    means.append(float(col_mean) if not pd.isna(col_mean) else 0.0)
+                charts["comparison"]["labels"] = [str(col) for col in cols_to_use.tolist()]
+                charts["comparison"]["values"] = means
+                logger.info(f"Generated comparison chart with {len(cols_to_use)} columns")
+            except Exception as e:
+                logger.error(f"Error creating comparison chart: {str(e)}")
+                logger.error(traceback.format_exc())
+        else:
+            charts["comparison"] = {"labels": [], "values": []}
+
+        # CORRELATION CHART
+        if len(numeric_cols) > 1:
+            try:
+                cols_for_corr = numeric_cols[:5]
+                logger.info(f"Using columns {cols_for_corr} for correlation chart")
+                corr_matrix = df[cols_for_corr].corr().fillna(0).values.tolist()
+                corr_matrix = [[float(cell) for cell in row] for row in corr_matrix]
+                charts["correlation"]["labels"] = [str(col) for col in cols_for_corr.tolist()]
+                charts["correlation"]["values"] = corr_matrix
+                logger.info(f"Generated correlation chart with {len(cols_for_corr)} dimensions")
+            except Exception as e:
+                logger.error(f"Error creating correlation chart: {str(e)}")
+                logger.error(traceback.format_exc())
+
+        # RADAR CHART (Spider Chart for Data Dimensions)
+        if len(numeric_cols) > 0:
+            try:
+                radar_values = []
+                for col in numeric_cols:
+                    value = df[col].mean()
+                    radar_values.append(float(value) if not pd.isna(value) else 0.0)
+                charts["radar"]["labels"] = [str(col) for col in numeric_cols.tolist()]
+                charts["radar"]["datasets"] = [{
+                    "label": "Data Dimensions",
+                    "data": radar_values
+                }]
+                logger.info(f"Generated radar chart with {len(numeric_cols)} dimensions")
+            except Exception as e:
+                logger.error(f"Error creating radar chart: {str(e)}")
+                logger.error(traceback.format_exc())
+                charts["radar"]["labels"] = []
+                charts["radar"]["datasets"] = []
+        else:
+            charts["radar"]["labels"] = []
+            charts["radar"]["datasets"] = []
+
         ensure_charts_have_data(charts)
-
         return charts
 
     except Exception as e:
@@ -690,73 +590,22 @@ def generate_chart_data_from_files(processed_data, file_paths, session_id):
         logger.error(traceback.format_exc())
         return get_default_charts()
 
-def load_dataframe(file_path):
-    """
-    Load a dataframe from a file.
-    
-    Args:
-        file_path: Path to the file
-        
-    Returns:
-        Pandas DataFrame or None if loading fails
-    """
-    try:
-        # Get file extension
-        _, ext = os.path.splitext(file_path)
-        ext = ext.lower()
-        
-        # Load based on extension
-        if ext == '.csv':
-            try:
-                df = pd.read_csv(file_path)
-            except UnicodeDecodeError:
-                df = pd.read_csv(file_path, encoding='latin1')
-        elif ext in ['.xlsx', '.xls']:
-            df = pd.read_excel(file_path)
-        elif ext == '.json':
-            try:
-                df = pd.read_json(file_path)
-            except ValueError:
-                # Try loading as dictionary if array format fails
-                with open(file_path, 'r') as f:
-                    data = json.load(f)
-                if isinstance(data, dict):
-                    df = pd.DataFrame.from_dict(data, orient='index')
-                else:
-                    df = pd.DataFrame(data)
-        elif ext == '.txt' or ext == '.dat':
-            # Try to infer delimiter
-            df = pd.read_csv(file_path, sep=None, engine='python')
-        else:
-            logger.warning(f"Unsupported file type: {ext}")
-            return None
-            
-        return df
-    except Exception as e:
-        logger.error(f"Error loading dataframe: {str(e)}")
-        logger.error(traceback.format_exc())
-        return None
-
 def ensure_charts_have_data(charts):
     """
     Ensure all charts have data, filling in defaults if needed.
-    
-    Args:
-        charts: Dictionary with chart data
     """
-    # Check each chart type and provide defaults if empty
     if not charts["performance"]["labels"]:
         charts["performance"]["labels"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"]
         charts["performance"]["values"] = [65, 59, 80, 81, 56, 55, 40]
-        
+
     if not charts["category"]["labels"]:
         charts["category"]["labels"] = ["Category A", "Category B", "Category C", "Category D"]
         charts["category"]["values"] = [30, 50, 20, 10]
-        
+
     if not charts["comparison"]["labels"]:
         charts["comparison"]["labels"] = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         charts["comparison"]["values"] = [12, 19, 3, 5, 2]
-        
+
     if not charts["correlation"]["labels"]:
         charts["correlation"]["labels"] = ["A", "B", "C", "D", "E"]
         charts["correlation"]["values"] = [
@@ -767,12 +616,16 @@ def ensure_charts_have_data(charts):
             [0.1, 0.2, 0.4, 0.9, 1]
         ]
 
+    if not charts["radar"].get("datasets") or not charts["radar"]["datasets"]:
+        charts["radar"]["labels"] = ["Metric 1", "Metric 2", "Metric 3", "Metric 4"]
+        charts["radar"]["datasets"] = [{
+            "label": "Data Dimensions",
+            "data": [0, 0, 0, 0]
+        }]
+
 def get_default_charts():
     """
     Get default chart data.
-    
-    Returns:
-        Dictionary with default chart data
     """
     return {
         "performance": {
@@ -788,3 +641,137 @@ def get_default_charts():
             "values": [12, 19, 3, 5, 2]
         },
         "correlation": {
+            "labels": ["A", "B", "C", "D", "E"],
+            "values": [
+                [1, 0.8, 0.6, 0.2, 0.1],
+                [0.8, 1, 0.7, 0.3, 0.2],
+                [0.6, 0.7, 1, 0.5, 0.4],
+                [0.2, 0.3, 0.5, 1, 0.9],
+                [0.1, 0.2, 0.4, 0.9, 1]
+            ]
+        },
+        "radar": {
+            "labels": ["Metric 1", "Metric 2", "Metric 3", "Metric 4"],
+            "datasets": [{
+                "label": "Data Dimensions",
+                "data": [0, 0, 0, 0]
+            }]
+        }
+    }
+
+@main.route('/ask', methods=['POST'])
+def ask_question():
+    """
+    Answer a question about the data using AI.
+    """
+    logger.info("Handling question request")
+    try:
+        data = request.get_json()
+        if not data or 'question' not in data:
+            logger.warning("No question in the request")
+            return jsonify({"success": False, "error": "No question provided"}), 400
+
+        question = data['question']
+        logger.info(f"Received question: {question}")
+
+        if 'session_id' not in session:
+            logger.warning("No session ID found")
+            return jsonify({"success": False, "error": "No active session"}), 400
+
+        session_id = session['session_id']
+        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+        session_folder = os.path.join(upload_folder, session_id)
+
+        if not os.path.exists(session_folder):
+            logger.warning(f"Session folder does not exist: {session_folder}")
+            return jsonify({
+                "answer": "I don't have any data to analyze. Please upload some files first."
+            })
+
+        files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
+                 if os.path.isfile(os.path.join(session_folder, f))]
+
+        if not files:
+            logger.warning(f"No files found in session folder: {session_folder}")
+            return jsonify({
+                "answer": "I don't have any data to analyze. Please upload some files first."
+            })
+
+        processed_data = process_files_directly(files)
+        ai_client = get_ai_instance()
+        if not ai_client:
+            logger.warning("AI client is not available")
+            return jsonify({
+                "answer": "I'm analyzing your data. It appears to contain " +
+                          f"{processed_data.get('totalRecords', 'some')} records across " +
+                          f"{len(files)} files. What specific insights are you looking for?"
+            })
+
+        data_context = {
+            "files": [os.path.basename(f) for f in files],
+            "data_overview": processed_data
+        }
+        answer = ai_client.answer_question(question, data_context)
+        return jsonify({"answer": answer})
+
+    except Exception as e:
+        logger.error(f"Exception in ask_question: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "answer": f"I'm sorry, I encountered an error while processing your question: {str(e)}"
+        })
+
+@main.route('/file/<path:filename>')
+def get_file(filename):
+    """
+    Serve an uploaded file.
+    """
+    logger.info(f"Request to get file: {filename}")
+    try:
+        if 'session_id' not in session:
+            logger.warning("No session ID found")
+            abort(403)
+
+        session_id = session['session_id']
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], session_id, filename)
+        if not os.path.exists(file_path):
+            logger.warning(f"File not found: {file_path}")
+            abort(404)
+
+        return send_from_directory(
+            os.path.join(current_app.config['UPLOAD_FOLDER'], session_id),
+            filename
+        )
+    except Exception as e:
+        logger.error(f"Exception in get_file: {str(e)}")
+        logger.error(traceback.format_exc())
+        abort(500)
+
+@main.route('/delete/<path:filename>', methods=['DELETE'])
+def delete_file(filename):
+    """
+    Delete an uploaded file.
+    """
+    logger.info(f"Request to delete file: {filename}")
+    try:
+        if 'session_id' not in session:
+            logger.warning("No session ID found")
+            return jsonify({"success": False, "error": "No active session"}), 400
+
+        session_id = session['session_id']
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], session_id, filename)
+        if not os.path.exists(file_path):
+            logger.warning(f"File not found: {file_path}")
+            return jsonify({"success": False, "error": "File not found"}), 404
+
+        os.remove(file_path)
+        logger.info(f"Successfully deleted file: {filename}")
+        return jsonify({
+            "success": True,
+            "message": f"File {filename} deleted successfully"
+        })
+
+    except Exception as e:
+        logger.error(f"Exception in delete_file: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
