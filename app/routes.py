@@ -10,7 +10,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, request, jsonify, current_app,
-    session, send_from_directory, abort
+    session, send_from_directory, abort, redirect,url_for
 )
 
 from .file_processing import DataProcessor
@@ -63,9 +63,102 @@ def load_dataframe(file_path):
 
 @main.route('/')
 def index():
-    """Render the main page."""
-    logger.info("Rendering index page")
-    return render_template('index.html')
+    """Render the a.html page first."""
+    logger.info("Rendering a.html page")
+    return render_template('a.html')
+
+@main.route('/login')
+def login():
+    """Render the login page."""
+    logger.info("Rendering login page")
+    return render_template('login.html')
+
+@main.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    """Handle login and render the main dashboard page."""
+    logger.info(f"Dashboard route called with method: {request.method}")
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        logger.debug(f"Login attempt with username: {username}")
+
+        # Here you would typically validate the credentials
+        # For this example, we'll just check if they're not empty
+        if username and password:
+            # You could set a session variable to track login status
+            session['logged_in'] = True
+            session['username'] = username
+            logger.info(f"User {username} logged in successfully")
+            return render_template('index.html', username=username)
+        else:
+            # If validation fails, go back to login with an error
+            logger.warning("Invalid login credentials")
+            return render_template('login.html', error="Invalid credentials")
+
+    # If it's a GET request, check if user is already logged in
+    if session.get('logged_in'):
+        logger.info(f"User {session.get('username')} already logged in")
+        return render_template('index.html', username=session.get('username'))
+    else:
+        # Redirect to login if not logged in
+        logger.info("User not logged in, redirecting to login page")
+        return redirect(url_for('main.login'))
+
+@main.route('/logout')
+def logout():
+    """Log out the user and redirect to the login page."""
+    logger.info(f"Logging out user: {session.get('username')}")
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    return redirect(url_for('main.login'))
+
+@main.route('/api/login', methods=['POST'])
+def api_login():
+    """API endpoint for login."""
+    try:
+        data = request.get_json()
+        username = data.get('username') or data.get('email')
+        password = data.get('password')
+        
+        logger.info(f"API login attempt for user: {username}")
+
+        # Here you would validate credentials against your database
+        # For this example, we'll use a simple check
+        if username and password:  # Replace with actual validation
+            # Generate a simple token (in production, use a proper JWT)
+            import secrets
+            token = secrets.token_hex(16)
+
+            # In a real app, you'd store this token in a database
+            # For this example, we'll store in session
+            session['token'] = token
+            session['logged_in'] = True
+            session['user_id'] = 1  # Example user ID
+            session['username'] = username.split('@')[0] if '@' in username else username
+            
+            logger.info(f"API login successful for user: {session['username']}")
+
+            return jsonify({
+                'success': True,
+                'token': token,
+                'user_id': 1,
+                'username': session['username']
+            })
+        else:
+            logger.warning("API login failed: Invalid credentials")
+            return jsonify({
+                'success': False,
+                'message': 'Invalid credentials'
+            }), 401
+
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred during login'
+        }),
 
 @main.route('/upload', methods=['POST'])
 def upload_files():

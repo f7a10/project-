@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SmartDataHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Reuse the same CSS variables and styles from the main page */
+        
+        :root {
+            /* starting css */
+            --primary-color: #8957ff;
+            --secondary-color: #6c47d5;
+            --accent-color: #ff57b9;
+            --background-dark: #0f172a;
+            --background-light: #1e293b;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --card-background: #ffffff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.6;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .login-container input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .login-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(137, 87, 255, 0.35);
+        }
+
+        .login-container p {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .login-container p a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-container p a:hover {
+            text-decoration: underline;
+        }
+
+        .toggle-form {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .toggle-form a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h2 id="formTitle">Login</h2>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        
+        <form id="loginForm" action="/dashboard" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <p>Don't have an account? <a href="#" id="toggleLink">Sign up</a></p>
+    </div>
+    
+    <script>
+        // Toggle between login and signup forms
+        const loginContainer = document.getElementById('loginContainer');
+        const formTitle = document.getElementById('formTitle');
+        const loginForm = document.getElementById('loginForm');
+        const toggleLink = document.getElementById('toggleLink');
+        const errorMessage = document.getElementById('error-message');
+
+        toggleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            errorMessage.style.display = 'none';
+            
+            if (formTitle.textContent === 'Login') {
+                formTitle.textContent = 'Sign Up';
+                loginForm.innerHTML = `
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                `;
+                loginForm.action = "/register";
+                toggleLink.textContent = 'Login';
+            } else {
+                formTitle.textContent = 'Login';
+                loginForm.innerHTML = `
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                `;
+                loginForm.action = "/dashboard";
+                toggleLink.textContent = 'Sign up';
+            }
+        });
+
+        // Handle form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const isLoginForm = formTitle.textContent === 'Login';
+            const formData = new FormData(loginForm);
+            const formObject = {};
+            
+            formData.forEach((value, key) => {
+                formObject[key] = value;
+            });
+            
+            // Validate form
+            if (isLoginForm) {
+                if (!formObject.username || !formObject.password) {
+                    showError('Please enter both username and password');
+                    return;
+                }
+                
+                // Send login request
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: formObject.username,
+                        password: formObject.password
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Store token and redirect
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify({
+                            id: data.user_id,
+                            username: data.username
+                        }));
+                        window.location.href = '/dashboard';
+                    } else {
+                        showError(data.message || 'Invalid username or password');
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    showError('An error occurred during login');
+                });
+            } else {
+                // Handle signup
+                if (!formObject.name || !formObject.email || !formObject.password) {
+                    showError('Please fill in all fields');
+                    return;
+                }
+                
+                // Send signup request
+                fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: formObject.name,
+                        email: formObject.email,
+                        password: formObject.password
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success and switch to login
+                        showError('Account created successfully! Please login.', 'success');
+                        setTimeout(() => {
+                            formTitle.textContent = 'Login';
+                            loginForm.innerHTML = `
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                                </div>
+                                <button type="submit">Login</button>
+                            `;
+                            loginForm.action = "/dashboard";
+                            toggleLink.textContent = 'Sign up';
+                        }, 2000);
+                    } else {
+                        showError(data.message || 'Error creating account');
+                    }
+                })
+                .catch(error => {
+                    console.error('Signup error:', error);
+                    showError('An error occurred during signup');
+                });
+            }
+        });
+        
+        function showError(message, type = 'error') {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            if (type === 'success') {
+                errorMessage.style.color = 'var(--success-color)';
+            } else {
+                errorMessage.style.color = 'var(--danger-color)';
+            }
+        }
+    </script>
+</body>
+</html>
