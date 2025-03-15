@@ -18,7 +18,7 @@ class OpenRouterAI:
     def __init__(self, api_key: Optional[str] = None):
         """Initialize the OpenRouter AI client."""
         # Use the provided API key or the environment variable
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or "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"
+        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or "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"
 
         # Log API key status (not the actual key)
         if self.api_key:

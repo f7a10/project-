@@ -31,10 +31,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # API keys
-    OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY') or "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"
+    OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY') or "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"
 
     # AI model config
-    OPENROUTER_MODEL = "deepseek-ai/deepseek-coder-33b-instruct"
+    OPENROUTER_MODEL = "qwen/qwq-32b:free"
     OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 

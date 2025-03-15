@@ -3,507 +3,814 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartDataHub - Enterprise AI Analytics Platform</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>SmartDataHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
-            --primary-color: #8957ff;
-            --secondary-color: #6c47d5;
-            --accent-color: #ff57b9;
-            --background-dark: #0f172a;
-            --background-light: #1e293b;
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --card-background: #ffffff;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary-color: #a855f7;
+            --primary-gradient: linear-gradient(90deg, #9b3afc 0%, #9b3afc 100%);
+            --dark-bg: #0f1123;
+            --card-bg: #1f2344;
+            --hover-bg: #000000b3;
+            --accent-color: #9431f0;
+            --text-color: #ffffff;
+            --text-secondary: #d4d4d4b3;
+            --border-color: #0000001a;
         }
-
+        
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
-
+        
         body {
-            background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f1123 100%);
+            color: var(--text-color);
             line-height: 1.6;
+            min-height: 100vh;
         }
-
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
         .navbar {
             display: flex;
             justify-content: space-between;
-            padding: 1.5rem 2rem;
             align-items: center;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.2rem 0;
+            border-bottom: 1px solid var(--border-color);
         }
-
+        
         .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: var(--primary-color);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-
+        
+        .logo i {
+            color: var(--primary-color);
+        }
+        
         .nav-links {
             display: flex;
             gap: 2.5rem;
-            align-items: center;
         }
-
+        
         .nav-links a {
-            color: var(--text-primary);
+            color: var(--text-color);
             text-decoration: none;
-            transition: var(--transition);
-            position: relative;
             font-weight: 500;
-            font-size: 0.95rem;
+            position: relative;
         }
-
-        .nav-links a:not(.btn-remix)::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-            transition: var(--transition);
-            border-radius: 2px;
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
         }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .btn-remix {
-            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-            color: var(--text-primary);
-            padding: 0.8rem 1.8rem;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(137, 87, 255, 0.25);
+        
+        .btn {
+            cursor: pointer;
             font-weight: 600;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
         }
-
-        .btn-remix:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(137, 87, 255, 0.35);
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
-
+        
         .hero {
             text-align: center;
-            padding: 10rem 1rem 6rem;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 4rem 1rem 2rem;
+            position: relative;
         }
-
+        
         .hero h1 {
-            font-size: 4rem;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: white;
             line-height: 1.2;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: fadeInUp 1s ease-out;
-            font-weight: 800;
-            letter-spacing: -1px;
         }
-
+        
         .hero p {
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            font-size: 1.25rem;
+            font-size: 1rem;
             max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            animation: fadeInUp 1s ease-out 0.3s backwards;
+            margin: 0 auto 1.5rem auto;
+            color: var(--text-secondary);
         }
-
-        .dashboard {
-            background: var(--card-background);
-            border-radius: 24px;
-            margin: 2rem auto;
-            padding: 2.5rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        
+        .content-frame {
             max-width: 1200px;
-            animation: slideUp 1s ease-out;
+            margin: 2rem auto;
+            background: rgba(10, 7, 27, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-
+        
+        .dashboard {
+            padding: 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent-color);
+        }
+        
+        .section-subtitle {
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-bg);
+        }
+        
+        .upload-box {
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-box h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-box p {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+        
+        .dropzone {
+            border: 2px dashed var(--text-secondary);
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            margin: 1rem 0;
+            background-color: #171c41;
+            cursor: pointer;
+        }
+        
+        .dropzone i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.8rem;
+        }
+        
+        .dropzone p {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        
+        .dropzone small {
+            display: block;
+            color: var(--);
+            font-size: 0.8rem;
+        }
+        
+        .analytics-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .analytics-btn i {
+            margin-right: 0.5rem;
+        }
+        
         .dashboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
         }
-
+        
+        .dashboard-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .dashboard-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-color);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .stat-card {
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 16px;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--background-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .chart-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .chart-card {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 16px;
-            transition: var(--transition);
-        }
-
-        .chart-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--background-dark);
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            padding: 1.2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(98, 103, 167, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .stat-icon i {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+            position: relative;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            color: var(--text-color);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px,3fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .chart-card {
+            padding: 1.2rem;
+        }
+        
+        .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 1rem;
         }
-
-        .stats-circle {
-            width: 180px;
-            height: 180px;
-            margin: 2rem auto;
-            position: relative;
-            background: conic-gradient(
-                var(--primary-color) 72.2%,
-                #e2e8f0 0
-            );
-            border-radius: 50%;
+        
+        .chart-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .chart-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+        
+        .chart-action {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: rgba(216, 115, 115, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .stats-circle::before {
-            content: '';
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            background: white;
-            border-radius: 50%;
-        }
-
-        .stats-circle::after {
-            content: '72.2%';
-            position: absolute;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--background-dark);
-        }
-
-        .action-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            background: #f1f5f9;
-            color: var(--background-dark);
             cursor: pointer;
-            transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        .chart-placeholder {
+            height: 180px;
+            background: linear-gradient(135deg, #2c286480 0%, #2c286480 100%);
+            border-radius: 9px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.8rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .chart-placeholder i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .chart-placeholder p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .image-container {
+            margin-top: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            border-radius: 6px;
+            padding: 0.3rem;
+            display: flex;
+            gap: 0.3rem;
+        }
+        
+        .image-action {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            background: rgba(114, 108, 108, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 0.8rem;
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .floating-action i {
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        /* AI Analysis Section */
+        .ai-analysis-section {
+            margin-top: 2rem;
+            background: linear-gradient(145deg, #1f2344, #2e1d4750);
+            border-radius: 16px;
+            padding: 1.8rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(0, 0, 0, 0.15);
         }
 
-        .action-btn:hover {
-            background: #e2e8f0;
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-            color: var(--text-primary);
-            padding: 0.8rem 1.8rem;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(137, 87, 255, 0.25);
-            font-weight: 600;
+        .ai-analysis-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: #fff;
+            background: linear-gradient(90deg, #a855f7, #7928ca);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: inline-block;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(137, 87, 255, 0.35);
+        .ai-analysis-section p {
+            color: #d1d5db;
+            margin-bottom: 1.2rem;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .chart-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .dashboard {
-                margin: 1rem;
-                padding: 1.5rem;
-            }
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 2rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .data-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: var(--background-dark);
-        }
-
-        .data-table tr:hover {
-            background: #f1f5f9;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: #dcfce7;
-            color: var(--success-color);
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: var(--warning-color);
-        }
-
-        .floating-menu {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: white;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
+        .btn-analyze-ai {
+            background: linear-gradient(90deg, #a855f7,rgb(120, 73, 170));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 1.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: var(--transition);
+            gap: 0.5rem;
+            max-width: 200px;
+            font-weight: 500;
         }
 
-        .floating-menu:hover {
-            transform: scale(1.1);
+        .btn-analyze-ai:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        
+        .ai-chat-box {
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #111527b3;
+            border: 1px solid #000000;
+            margin-top: 1.2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .chat-messages {
+            padding: 1.5rem;
+            max-height: 350px;
+            min-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #121531 rgba(30, 32, 50, 0.7);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #12209b;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: #220f354d;
+            border-radius: 6px;
+        }
+
+        .message {
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            max-width: 85%;
+        }
+
+
+        .ai-message {
+            background-color: #211e47;
+            color: #e2e8f0;
+            border-left: 3px solid #a855f7;
+        }
+
+        .user-message {
+            background-color: #211e47;
+            color: #e2e8f0;
+            margin-left: auto;
+            border-right: 3px solid #a855f7;
+        }
+
+        .chat-input-container {
+            display: flex;
+            background-color:#111527b3;
+            padding: 1rem;
+            gap: 0.8rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        #chat-input {
+            flex: 1;
+            background-color: #211e47;
+            border: 1px solid rgba(255, 255, 255, 0.123);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: #00000080;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-send {
+            background: linear-gradient(90deg, #a855f7, #a855f7);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-send:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-frame {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">SmartDataHub</div>
-        <div class="nav-links">
-            <a href="#">Features</a>
-            <a href="#">Pricing</a>
-            <a href="#">Reports</a>
-            <a href="#">Support</a>
-            <a href="/login" class="btn-remix">Login</a>
-        </div>
-    </nav>
-    <section class="hero">
-        <h1>Transform Data into Actionable Insights</h1>
-        <p>Leverage AI-powered analytics to unlock hidden patterns, optimize performance, and drive business growth</p>
-        <a href="/login" class="btn-primary">Continue to Login</a>
-    </section>
-
-    <div class="dashboard">
-        <div class="dashboard-header">
-            <h2 style="color: var(--background-dark); font-size: 1.75rem; font-weight: 700;">Analytics Overview</h2>
-            <div style="display: flex; gap: 1rem;">
-                <button class="action-btn">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                <button class="action-btn">
-                    <i class="fas fa-download"></i> Export
-                </button>
+    <div class="container">
+        <div class="navbar">
+            <div class="logo">
+                <i class=""></i>
+                SmartDataHub
             </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">87%</div>
-                <div class="stat-label">Performance Score</div>
+            <div class="nav-links">
+                <a href="#"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="#"><i class="fas fa-file-alt"></i> Reports</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">2.4M</div>
-                <div class="stat-label">Total Requests</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">$12.5K</div>
-                <div class="stat-label">Revenue</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">95.4%</div>
-                <div class="stat-label">Satisfaction Rate</div>
-            </div>
+            <button class="btn btn-primary" onclick="openFile()">
+                <i class="fas fa-rocket"></i> Get Started
+              </button>
         </div>
         
-        <div class="chart-container">
-            <div class="chart-card">
-                <div class="chart-title">
-                    Performance Metrics
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="action-btn">
-                            <i class="fas fa-chart-line"></i>
+        <div class="hero">
+            <h1>Unlock Business Potential with AI Analytics</h1>
+            <p>Harness the power of advanced data analysis to identify trends, optimize performance, and drive strategic decisions</p>
+            <button class="btn btn-primary" onclick="openFile()">
+                <i class="fas fa-rocket"></i> Get Started
+              </button>
+        </div>
+        
+        <div class="content-frame">
+            <div class="dashboard">
+                <div class="section-header">
+                    <h2 class="section-title">Transform Your Data into Strategic Insights</h2>
+                    <p class="section-subtitle">Use AI-powered analytics to discover hidden patterns and accelerate growth</p>
+                </div>
+                
+                <div class="card upload-box">
+                    <h3>Upload Your Data</h3>
+                    <p>Upload your data files to analyze and visualize</p>
+                    <div class="dropzone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop files or click to browse</p>
+                        <small>Supports CSV, Excel, JSON and other Python-compatible formats</small>
+                    </div>
+                    <button class="analytics-btn">
+                        <i class="fas fa-brain"></i> Analyze with AI
+                    </button>
+                </div>
+                
+                <div class="dashboard-header">
+                    <div class="dashboard-title">Analytics Overview</div>
+                    <div class="dashboard-actions">
+                        <button class="action-btn" title="Filter">
+                            <i class="fas fa-filter"></i>
                         </button>
-                        <button class="action-btn">
-                            <i class="fas fa-ellipsis-v"></i>
+                        <button class="action-btn" title="Export">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="action-btn" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                 </div>
-                <canvas id="performanceChart" height="300"></canvas>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Resource Usage</div>
-                <div class="stats-circle"></div>
-                <button class="btn-remix" style="width: 100%; margin-top: 1rem;">
-                    <i class="fas fa-robot"></i> Analyze with AI
-                </button>
+                
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="stat-value">N/A</div>
+                        <div class="stat-label">Total Records</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">N/A</div>
+                        <div class="stat-label">Data Quality</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-value">N/A</div>
+                        <div class="stat-label">Completeness</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-table"></i>
+                        </div>
+                        <div class="stat-value">N/A</div>
+                        <div class="stat-label">Fields</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active">
+                        <i class="fas fa-th-large"></i> Overview
+                    </div>
+                    <div class="tab">
+                        <i class="fas fa-chart-bar"></i> Distribution
+                    </div>
+                    <div class="tab">
+                        <i class="fas fa-link"></i> Correlation
+                    </div>
+                    <div class="tab">
+                        <i class="fas fa-chart-line"></i> Trends
+                    </div>
+                    <div class="tab">
+                        <i class="fas fa-arrow-trend-up"></i> Growth
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Performance Metrics</div>
+                            <div class="chart-actions">
+                                <div class="chart-action" title="Expand">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                                <div class="chart-action" title="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p></p>
+                        </div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Category Distribution</div>
+                            <div class="chart-actions">
+                                <div class="chart-action" title="Expand">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                                <div class="chart-action" title="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-pie"></i>
+                            <p></p>
+                        </div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Monthly Comparison</div>
+                            <div class="chart-actions">
+                                <div class="chart-action" title="Expand">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                                <div class="chart-action" title="More options">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-bar"></i>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                
+        <div class="ai-analysis-section">
+            <h3>AI-Powered Insights</h3>
+            <p>Get deeper insights about your data with our AI assistant</p>
+            <button id="btn-analyze-ai" class="btn-analyze-ai">Analyze with AI</button>
+
+           
+            <div id="ai-chat-box" class="ai-chat-box">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Initial AI message -->
+                    <div class="message ai-message">
+                        <p>Hello! I'm your AI data assistant. After you upload and analyze your data, I'll provide insights and answer any questions you have.</p>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Ask a question about your data...">
+                    <button id="send-message" class="btn-send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Status</th>
-                    <th>Usage</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>API Gateway</td>
-                    <td><span class="status-badge status-active">Active</span></td>
-                    <td>85%</td>
-                    <td>2 mins ago</td>
-                </tr>
-                <tr>
-                    <td>Database Cluster</td>
-                    <td><span class="status-badge status-active">Active</span></td>
-                    <td>72%</td>
-                    <td>5 mins ago</td>
-                </tr>
-                <tr>
-                    <td>Cache Service</td>
-                    <td><span class="status-badge status-pending">Pending</span></td>
-                    <td>45%</td>
-                    <td>12 mins ago</td>
-                </tr>
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
-
-    <div class="floating-menu">
-        <i class="fas fa-headset" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+    
+    <div class="floating-action" title="Help">
+        <i class="fas fa-question"></i>
+        
     </div>
+    <hr style="border: none; height: 0.1px; background-color: rgb(65, 65, 65); width: 73%; margin: 70px auto;">
 
     <script>
         // API URL for backend communication
@@ -551,51 +858,6 @@
             }
         }
 
-        async function fetchServiceStatus() {
-            try {
-                const response = await fetch(`${API_URL}/services/status`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error fetching service status:', error);
-                return [];
-            }
-        }
-
-        // Initialize performance chart
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: 'Performance',
-                    data: [65, 75, 70, 80, 75, 85, 82, 90, 85, 88, 92, 95],
-                    borderColor: '#8957ff',
-                    backgroundColor: 'rgba(137, 87, 255, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
         // Add smooth scroll behavior
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -605,14 +867,9 @@
                 });
             });
         });
-
-        // Add login button functionality
-        document.querySelectorAll('a[href="/login"]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = '/login';
-            });
-        });
-    </script>
+        function openFile() {
+             window.location.href = "/login"; 
+        }
+     </script>
 </body>
 </html>
